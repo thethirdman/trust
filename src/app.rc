@@ -1,0 +1,10 @@
+#[link(name     = "app"
+       , vers   = "0.0"
+       , author = "Fançois Ripault, Sébastien Crozet"
+       , uuid   = "e0420ed2-0ea4-4310-b72d-fdb4d7032034")];
+#[crate_type = "bin"];
+#[warn(non_camel_case_types)]
+
+extern mod std;
+
+pub mod app;

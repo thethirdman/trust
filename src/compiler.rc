@@ -1,0 +1,11 @@
+#[link(name     = "compiler"
+       , vers   = "0.0"
+       , author = "Fançois Ripault, Sébastien Crozet"
+       , uuid   = "CEBD36EE-BE11-463E-B8AC-D69910E452DD")];
+#[crate_type = "bin"];
+#[warn(non_camel_case_types)]
+
+extern mod std;
+
+pub mod compiler;
+pub mod ptrie;

@@ -1,0 +1,6 @@
+*.swp
+*.html
+lib
+bin
+TextMiningCompiler
+TextMiningApp

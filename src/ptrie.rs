@@ -1,4 +1,3 @@
-
 /* Compiled representation of our Trie
 struct PTrie
 {
@@ -16,5 +15,5 @@ struct PTrie
   key       : ~str,
   freq      : int,
   word_stop : bool,
-  succ      : ~[Ptrie]
+  succ      : ~[PTrie]
 }
