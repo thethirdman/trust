@@ -3,7 +3,11 @@
        , author = "Fançois Ripault, Sébastien Crozet"
        , uuid   = "e0420ed2-0ea4-4310-b72d-fdb4d7032034")];
 #[crate_type = "bin"];
-#[warn(non_camel_case_types)]
+#[deny(non_camel_case_types)];
+#[deny(non_uppercase_statics)];
+#[deny(unnecessary_qualification)];
+#[deny(missing_doc)];
+#[deny(warnings)];
 
 extern mod std;
 
