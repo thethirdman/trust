@@ -1,5 +1,5 @@
 use std::util;
-use extra::list;
+use my_list::{HasKey, MyList, Cons, Nil};
 
 /**
  * Patricia Trie node structure. A patricia trie is the same as a Trie but each node contains a
@@ -17,7 +17,19 @@ pub struct PTrie
   freq      : uint,
 
   /// Children of this node.
-  succ      : @list::List<(char, @mut PTrie)>
+  succ      : ~MyList<~PTrie, u8>
+}
+
+impl HasKey<u8> for ~PTrie
+{
+  fn key(&self) -> u8
+  { self.key[0] }
+}
+
+impl HasKey<u8> for PTrie
+{
+  fn key(&self) -> u8
+  { self.key[0] }
 }
 
 
@@ -26,23 +38,26 @@ impl PTrie
   /// Creates a new patricia trie having the key `key`, with no successors, and a `freq` of 0
   pub fn new(key : ~str) -> PTrie
   {
-      PTrie{key : key, freq : 0, succ : @list::Nil}
+      PTrie{key : key, freq : 0, succ : ~Nil}
   }
 
-  // Returns the ptrie in the successors associated to the char if it exists
-  fn find_index(&self, letter : char) -> Option<@mut PTrie>
+  /// Number of nodes in this patricia trie.
+  pub fn len(&self) -> uint
   {
-    match list::find(self.succ, |&(a,_)| a == letter)
-    {
-      None => None,
-      Some ((_,b)) => Some (b)
-    }
+    let mut add_this = 1;
+
+    do self.succ.iter |c|
+    { add_this = add_this + c.len() }
+
+    add_this
   }
 
   /// Adds an element to the successors list
-  pub fn push(&mut self, elt : (char, @mut PTrie))
+  pub fn push(&mut self, elt : ~PTrie)
   {
-    self.succ = @list::Cons(elt, self.succ);
+    let mut newthing = ~Nil; // XXX Useless allocation
+    util::swap(&mut self.succ, &mut newthing);
+    self.succ = ~Cons(elt, newthing);
   }
 
   /// Dot reprensentation of the patricia trie.
@@ -79,7 +94,7 @@ impl PTrie
         Some(ref t) => t.lbl_to_dot_str(id, out)
       }
     }*/
-    list::iter(self.succ, |&(_,b)| b.lbl_to_dot_str(id, out))
+    self.succ.iter(|b| b.lbl_to_dot_str(id, out))
   }
 
   fn edg_to_dot_str(&self, id: &mut uint, out: &mut ~str)
@@ -98,30 +113,33 @@ impl PTrie
         }
       }
     }*/
-    list::iter(self.succ, |&(_,b)|
-        {
-        *id  = *id + 1;
-        *out = *out + me.to_str() + " -> " + id.to_str() + "\n";
-        b.edg_to_dot_str(id, out)
-        })
+    do self.succ.iter |b|
+    {
+      *id  = *id + 1;
+      *out = *out + me.to_str() + " -> " + id.to_str() + "\n";
+      b.edg_to_dot_str(id, out)
+    }
 
   }
 
   fn create_if(&mut self, word : ~str, succ_index: uint,  w_index : uint, freq : uint)
   {
     //let succ_index =  word[succ_index] as uint;
-    match self.find_index(word[succ_index] as char)
+    if match self.succ.find_mut(|c| c == word[succ_index])
+       {
+         None               => true,
+         Some(ref mut trie) => {
+           trie.add_word_index(word.clone(), w_index, freq); // XXX: useless allocation
+           false
+         }
+       }
     {
-      None =>
-      {
-        let suffix = word.slice_from(w_index).to_str();
-        let child = @mut PTrie::new(suffix);
-        assert!(child.freq == 0);
-        child.freq = freq;
-        self.push((word[succ_index] as char, child))
-        //self.succ[succ_index] = Some(child);
-      },
-      Some(ref mut trie) => trie.add_word_index(word, w_index, freq)
+      let suffix = word.slice_from(w_index).to_str();
+      let mut child = ~PTrie::new(suffix);
+      assert!(child.freq == 0);
+      child.freq = freq;
+      self.push(child)
+      //self.succ[succ_index] = Some(child);
     }
   }
 
@@ -160,7 +178,7 @@ impl PTrie
         let new_k       = self.key.slice_to(k_index).to_str();
         let rest_k      = self.key.slice_from(k_index).to_str();
 
-        let ptrie_k = @mut PTrie::new(rest_k);
+        let mut ptrie_k = ~PTrie::new(rest_k);
 
         self.key = new_k;
 
@@ -169,7 +187,7 @@ impl PTrie
         ptrie_k.freq = self.freq;
         self.freq    = freq;
 
-        self.push((ptrie_k.key[0] as char, ptrie_k));
+        self.push(ptrie_k);
         //let tmp        = ptrie_k.key[0] as uint;
         //self.succ[tmp] = Some(ptrie_k);
       }
@@ -180,7 +198,7 @@ impl PTrie
         let new_k       = self.key.slice_to(k_index).to_str();
         let rest_k      = self.key.slice_from(k_index).to_str();
         let rest_w      = word.slice_from(w_index);
-        let ptrie_k = @mut PTrie::new(rest_k);
+        let mut ptrie_k = ~PTrie::new(rest_k);
 
         ptrie_k.freq = self.freq;
         self.key = new_k;
@@ -188,15 +206,15 @@ impl PTrie
 
         util::swap(&mut self.succ, &mut ptrie_k.succ);
 
-        let ptrie_w    = @mut PTrie::new(rest_w.to_str());
+        let mut ptrie_w    = ~PTrie::new(rest_w.to_str());
 
         ptrie_w.freq = freq;
 
-        self.push((ptrie_k.key[0] as char, ptrie_k));
+        self.push(ptrie_k);
         //let tmp        = ptrie_k.key[0] as uint;
         //self.succ[tmp] = Some(ptrie_k);
 
-        self.push((ptrie_w.key[0] as char, ptrie_w));
+        self.push(ptrie_w);
         //let tmp        = ptrie_w.key[0] as uint;
         //self.succ[tmp] = Some(ptrie_w);
 
@@ -242,7 +260,7 @@ impl PTrie
   fn do_serialize(&self, out: &mut ~[uint])
   {
     // XXX This is NOT a breadth first search!
-    let num_succ = list::len(self.succ); // self.succ.iter().filter(|i| i.is_some()).len_();
+    let num_succ = self.succ.len();
     out.push(num_succ);
     out.push(self.key.len());
     out.push(self.freq);
@@ -269,9 +287,11 @@ impl PTrie
         }
       }
     }*/
-    list::iter(self.succ, |&(_,succ)|
-          { out[succ_id] = out.len();
-          succ_id      = succ_id + 1;
-          succ.do_serialize(out)})
+    do self.succ.iter |succ|
+    {
+      out[succ_id] = out.len();
+      succ_id      = succ_id + 1;
+      succ.do_serialize(out)
+    }
   }
 }

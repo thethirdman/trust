@@ -53,6 +53,8 @@ fn main()
           // println(i.to_str());
       }
 
+      // println("Num nodes: " + trie.len().to_str());
+
       {
         let path          = PosixPath(args[2]);
         let fwriter       = io::buffered_file_writer(&path).unwrap();
@@ -62,7 +64,7 @@ fn main()
         { fwriter.write_le_u64((*i) as u64) }
       }
 
-      // println(trie.to_dot_str());
+      println(trie.to_dot_str());
     }
   // Serialize
   // Write
