@@ -49,8 +49,9 @@ fn main()
           trie.add_word(word, freq);
       }
       //trie.serialize();
-    }
 
+      println(trie.to_dot_str());
+    }
   // Serialize
   // Write
   }

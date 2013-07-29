@@ -1,5 +1,7 @@
 *.swp
 *.html
+*.dot
+*.pdf
 lib
 bin
 TextMiningCompiler

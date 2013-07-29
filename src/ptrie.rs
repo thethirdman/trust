@@ -34,6 +34,60 @@ impl PTrie
     }
   }
 
+  /// Dot reprensentation of the patricia trie.
+  pub fn to_dot_str(&self) -> ~str
+  {
+    let mut res = ~"digraph ptrie {\n";
+
+    self.lbl_to_dot_str(&mut 0, &mut res);
+    self.edg_to_dot_str(&mut 0, &mut res);
+
+    res = res + "}\n";
+
+    res
+  }
+
+  fn lbl_to_dot_str(&self, id: &mut uint, out: &mut ~str)
+  {
+    if self.freq != 0
+    {
+      *out = *out + id.to_str() +
+             " [label=\"" + self.key + " ( " + self.freq.to_str() + " ) " + "\", color = red];\n";
+    }
+    else
+    {
+      *out = *out + id.to_str() + " [label=\"" + self.key + "\"];\n";
+    }
+    *id  = *id + 1;
+
+    for self.succ.iter().advance |s|
+    {
+      match *s
+      {
+        None        => { },
+        Some(ref t) => t.lbl_to_dot_str(id, out)
+      }
+    }
+  }
+
+  fn edg_to_dot_str(&self, id: &mut uint, out: &mut ~str)
+  {
+    let me = *id;
+
+    for self.succ.iter().advance |s|
+    {
+      match *s
+      {
+        None        => { },
+        Some(ref t) => {
+          *id  = *id + 1;
+          *out = *out + me.to_str() + " -> " + id.to_str() + "\n";
+          t.edg_to_dot_str(id, out)
+        }
+      }
+    }
+  }
+
   fn create_if(&mut self, word : ~str, succ_index: uint,  w_index : uint, freq : uint)
   {
     let succ_index = word[succ_index] as uint;
@@ -41,7 +95,9 @@ impl PTrie
     {
       None =>
       {
-        let mut child = ~PTrie::new(word);
+        let suffix = word.slice_from(w_index).to_str();
+        let mut child = ~PTrie::new(suffix);
+        assert!(child.freq == 0);
         child.freq = freq;
         self.succ[succ_index] = Some(child);
       },
@@ -70,6 +126,7 @@ impl PTrie
       // the freq
       if k_index == self.key.len() && w_index == word.len()
       {
+        assert!(self.freq == 0);
         self.freq = freq
       }
       // If we reach the end of the key, we just continue the insertion on the next node
@@ -80,36 +137,47 @@ impl PTrie
       // If we reach the end of the word, we need to split the key
       else if w_index == word.len()
       {
-        let new_k = self.key.slice_to(k_index).to_str();
-        let rest_k = self.key.slice_from(k_index).to_str();
+        let new_k       = self.key.slice_to(k_index).to_str();
+        let rest_k      = self.key.slice_from(k_index).to_str();
+
         let mut ptrie_k = ~PTrie::new(rest_k);
 
         self.key = new_k;
 
         util::swap(&mut self.succ, &mut ptrie_k.succ);
 
-        let tmp = ptrie_k.key[0] as uint;
+        ptrie_k.freq = self.freq;
+        self.freq    = freq;
+
+        let tmp        = ptrie_k.key[0] as uint;
         self.succ[tmp] = Some(ptrie_k);
       }
       // We have a common prefix: we split the key, create a new ptrie for
       // it, and create a new ptrie for the word
       else
       {
-        let new_k = self.key.slice_to(k_index).to_str();
-        let rest_k = self.key.slice_from(k_index).to_str();
-        let rest_w = word.slice_from(w_index);
+        let new_k       = self.key.slice_to(k_index).to_str();
+        let rest_k      = self.key.slice_from(k_index).to_str();
+        let rest_w      = word.slice_from(w_index);
         let mut ptrie_k = ~PTrie::new(rest_k);
 
+        ptrie_k.freq = self.freq;
         self.key = new_k;
 
 
         util::swap(&mut self.succ, &mut ptrie_k.succ);
 
-        let ptrie_w = ~PTrie::new(rest_w.to_str());
-        let tmp = ptrie_k.key[0] as uint;
+        let mut ptrie_w    = ~PTrie::new(rest_w.to_str());
+
+        ptrie_w.freq = freq;
+
+        let tmp        = ptrie_k.key[0] as uint;
         self.succ[tmp] = Some(ptrie_k);
-        let tmp = ptrie_w.key[0] as uint;
+
+        let tmp        = ptrie_w.key[0] as uint;
         self.succ[tmp] = Some(ptrie_w);
+
+        self.freq = 0;
       }
     }
   }
