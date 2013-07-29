@@ -1,0 +1,4 @@
+trust
+=====
+
+Textmining in Rust !
