@@ -1,9 +1,7 @@
-use std::*;
-use ptrie::*;
-
-fn add_word(trie : &mut PTrie, word : &str, freq : int)
-{
-}
+use std::os;
+use std::io;
+use std::uint;
+use ptrie::PTrie;
 
 // FIXME: exit comme un grand
 #[main]
@@ -17,7 +15,7 @@ fn main()
   }
   else
   {
-    let path    = path::PosixPath(args[1]);
+    let path    = PosixPath(args[1]);
     let freader = io::file_reader(&path);
 
     if freader.is_err()
@@ -28,13 +26,13 @@ fn main()
     {
       let reader   = freader.unwrap();
       let lines    = reader.read_lines();
-      let mut trie = PTrie{key : ~"", freq : 0, word_stop : false, succ : ~[]};
+      let mut trie = PTrie{key : None, freq : 0, succ : ~[]};
 
       for lines.iter().advance |line|
       {
         let words = line.word_iter().collect::<~[&str]>();
         let word  = words[0];
-        let freq  = int::from_str(words[1]);
+        let freq  = uint::from_str(words[1]);
 
         if freq.is_none()
         {
@@ -42,12 +40,12 @@ fn main()
         }
         else
         {
-          trie = add_word(&mut trie, word, freq.unwrap());
+          trie.add_word(word.to_str(), freq.unwrap());
         }
       }
+      //trie.serialize();
     }
 
-  // Add to trie
   // Serialize
   // Write
   }
