@@ -1,4 +1,7 @@
 use std::util;
+use std::cast;
+use std::ptr;
+use std::vec;
 
 /**
  * Patricia Trie node structure. A patricia trie is the same as a Trie but each node contains a
@@ -7,7 +10,7 @@ use std::util;
 pub struct PTrie
 {
   /// Prefix stored on this node.
-  key       : Option<~str>,
+  key       : ~str,
 
   /// Weight given to this node. If equal to zero, this node does not represent the end of a word.
   /// If different from zero, it represents the frequency of apparition of this world on the
@@ -15,7 +18,7 @@ pub struct PTrie
   freq      : uint,
 
   /// Children of this node.
-  succ      : ~[PTrie]
+  succ      : ~[Option<~PTrie>]
 }
 
 impl PTrie
@@ -23,63 +26,94 @@ impl PTrie
   /// Creates a new patricia trie having the key `key`, with no successors, and a `freq` of 0
   pub fn new(key : ~str) -> PTrie
   {
-    PTrie{key : Some(key), freq : 0, succ : ~[]} // XXX
+    unsafe
+    {
+      // Workaround a bug of the compiler
+      let tmp : *PTrie = ptr::null();
+      PTrie{key : key, freq : 0, succ : cast::transmute(vec::from_elem(256, tmp))}
+    }
+  }
+
+  fn create_if(&mut self, word : ~str, succ_index: uint,  w_index : uint, freq : uint)
+  {
+    let succ_index = word[succ_index] as uint;
+    match self.succ[succ_index]
+    {
+      None =>
+      {
+        let mut child = ~PTrie::new(word);
+        child.freq = freq;
+        self.succ[succ_index] = Some(child);
+      },
+      Some(ref mut trie) => trie.add_word_index(word, w_index, freq)
+    }
   }
 
   fn add_word_index(&mut self, word : ~str, w_index : uint, freq : uint)
   {
-    match self.key.clone()
+    // If the trie is empty
+    if self.key.len() == 0
     {
-      None => self.succ[word[w_index] as uint].add_word_index(word, w_index, freq),
-      Some (clef) =>
+      self.create_if(word, w_index, w_index, freq)
+    }
+    else
+    {
+      let mut k_index = 0;
+      let mut w_index = w_index;
+      // While the strings are the same
+      while k_index < self.key.len() && w_index < word.len() && self.key[k_index] == word[w_index]
       {
-        let mut k_index = 0;
-        let mut w_index = w_index;
-        while k_index < clef.len() && w_index < word.len() && clef[k_index] == word[w_index]
-        {
-          k_index = k_index + 1;
-          w_index = w_index + 1;
-        }
-        if k_index == clef.len() && w_index == word.len()
-        {
-          self.freq = freq
-        }
-        else if k_index == clef.len()
-        {
-          self.succ[word[w_index] as uint].add_word_index(word, w_index, freq)
-        }
-        else if w_index == word.len()
-        {
-          let new_k  = clef.slice_to(w_index);
-          self.key = Some(new_k.to_str());
-          self.succ[word[w_index] as uint].add_word_index(clef.to_str(), w_index + 1, freq);
-        }
-        else
-        {
-          let new_k = clef.slice_to(w_index);
-          let rest_k = clef.slice_from(w_index);
-          let rest_w = word.slice_from(w_index);
+        k_index = k_index + 1;
+        w_index = w_index + 1;
+      }
+      // If we reached the end on both the word and the key, then we just update
+      // the freq
+      if k_index == self.key.len() && w_index == word.len()
+      {
+        self.freq = freq
+      }
+      // If we reach the end of the key, we just continue the insertion on the next node
+      else if k_index == self.key.len()
+      {
+        self.create_if(word, w_index, w_index, freq)
+      }
+      // If we reach the end of the word, we need to split the key
+      else if w_index == word.len()
+      {
+        let new_k = self.key.slice_to(k_index).to_str();
+        let rest_k = self.key.slice_from(k_index).to_str();
+        let mut ptrie_k = ~PTrie::new(rest_k);
 
-          self.key = Some(new_k.to_str());
+        self.key = new_k;
 
-          let mut ptrie_k = PTrie::new(rest_k.to_str());
+        util::swap(&mut self.succ, &mut ptrie_k.succ);
 
-          util::swap(&mut self.succ, &mut ptrie_k.succ);
+        let tmp = ptrie_k.key[0] as uint;
+        self.succ[tmp] = Some(ptrie_k);
+      }
+      // We have a common prefix: we split the key, create a new ptrie for
+      // it, and create a new ptrie for the word
+      else
+      {
+        let new_k = self.key.slice_to(k_index).to_str();
+        let rest_k = self.key.slice_from(k_index).to_str();
+        let rest_w = word.slice_from(w_index);
+        let mut ptrie_k = ~PTrie::new(rest_k);
 
-          let ptrie_w = PTrie::new(rest_w.to_str());
+        self.key = new_k;
 
-          let tmp = ptrie_k.key.map(|s| s[0] as uint).unwrap();
-          self.succ[tmp] = ptrie_k;
-          let tmp = ptrie_w.key.map(|s| s[0] as uint).unwrap();
-          self.succ[tmp] = ptrie_w;
-        }
+
+        util::swap(&mut self.succ, &mut ptrie_k.succ);
+
+        let ptrie_w = ~PTrie::new(rest_w.to_str());
+        let tmp = ptrie_k.key[0] as uint;
+        self.succ[tmp] = Some(ptrie_k);
+        let tmp = ptrie_w.key[0] as uint;
+        self.succ[tmp] = Some(ptrie_w);
       }
     }
-
-  // word == clef -> rien
-  // pref(word) == clef -> {recurse}
-  // sinon splitte
   }
+
   /**
    * Add a word to the trie.
    *
@@ -118,30 +152,36 @@ impl PTrie
   {
     // XXX This is NOT a breadth first search!
     out.push(self.succ.len());
-    match self.key
+    if self.key.len() == 0
     {
-      None        => out.push(0),
-      Some(ref k) =>
-        {
-          out.push(k.len());
-          for k.iter().advance |c|
-          {
-            out.push(c as uint);
-          }
-        }
-    };
+      out.push(0)
+    }
+    else
+    {
+      out.push(self.key.len());
+      for self.key.iter().advance |c|
+      {
+        out.push(c as uint);
+      }
+    }
 
-    let mut succ_id = out.len();
+    //let mut succ_id = out.len();
 
     for self.succ.len().times
     { out.push(0) }
 
-    for self.succ.iter().advance |s|
+    // FIXME
+    /*for self.succ.iter().advance |s|
     {
       out[succ_id] = out.len();
       succ_id      = succ_id + 1;
 
-      s.do_serialize(out);
+      match s
+      {
+      None => { },
+      Some (ref succ) => succ.do_serialize(out)
+      }
     }
+    */
   }
 }
