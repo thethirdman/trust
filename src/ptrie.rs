@@ -15,6 +15,7 @@ pub struct PTrie
   /// Children of this node.
   succ      : ~[PTrie]
 }
+*/
 
 impl PTrie
 {
