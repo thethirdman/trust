@@ -11,10 +11,10 @@ struct PTrieHeader
 }
 
 /// Rebuilds the patricia trie from its compact version
-pub fn rebuild_ptrie(mem: &~os::MemoryMap) -> ~PTrie
+pub fn rebuild_ptrie(mem: &~os::MemoryMap) -> @mut PTrie
 { do_rebuild_ptrie(mem.data as *u64, mem.data as *u64) }
 
-fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
+fn do_rebuild_ptrie(start: *u64, curr: *u64) -> @mut PTrie
 {
   unsafe {
     let header = curr as *PTrieHeader;
@@ -34,7 +34,7 @@ fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
     /*
      * Build the new node with the key
      */
-    let mut ptrie = ~PTrie::new(key);
+    let ptrie = @mut PTrie::new(key);
     ptrie.freq = (*header).freq as uint;
 
     /*
@@ -45,7 +45,8 @@ fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
       // We have to lookup the first character of the successor
       let child_addr                 = start + *(succbegin + i);
       let child_first_letter         = *(child_addr + 3);
-      ptrie.succ[child_first_letter] = Some(do_rebuild_ptrie(start, child_addr))
+      ptrie.push((child_first_letter as char, do_rebuild_ptrie(start,child_addr)));
+      //ptrie.succ[child_first_letter] = Some(do_rebuild_ptrie(start, child_addr))
     }
 
     ptrie

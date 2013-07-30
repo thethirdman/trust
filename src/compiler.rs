@@ -50,6 +50,7 @@ fn main()
       {
           trie.add_word(word, freq);
           i = i + 1;
+          // println(i.to_str());
       }
 
       {
@@ -61,7 +62,7 @@ fn main()
         { fwriter.write_le_u64((*i) as u64) }
       }
 
-      println(trie.to_dot_str());
+      // println(trie.to_dot_str());
     }
   // Serialize
   // Write

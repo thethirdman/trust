@@ -9,6 +9,7 @@
 #[deny(missing_doc)];
 
 extern mod std;
+extern mod extra;
 
 pub mod app;
 pub mod ptrie;
