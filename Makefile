@@ -1,6 +1,6 @@
 all:
-	rust build src/compiler.rc -o TextMiningCompiler
-	rust build src/app.rc -o TextMiningApp
+	rust build --opt-level=3 src/compiler.rc -o TextMiningCompiler
+	rust build --opt-level=3 src/app.rc -o TextMiningApp
 
 doc:
 	mkdir -p doc/compiler

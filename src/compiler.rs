@@ -44,13 +44,25 @@ fn main()
       let mut trie = PTrie::new(w);
       trie.freq = f;
 
+      let mut i: uint = 1;
+
       for it.advance |(word, freq)|
       {
           trie.add_word(word, freq);
+          println(i.to_str());
+          i = i + 1;
       }
-      //trie.serialize();
 
-      println(trie.to_dot_str());
+      {
+        let path          = PosixPath(args[2]);
+        let fwriter       = io::buffered_file_writer(&path).unwrap();
+        let serialization = trie.serialize();
+
+        for serialization.iter().advance |i|
+        { fwriter.write_uint(*i) }
+      }
+
+      // println(trie.to_dot_str());
     }
   // Serialize
   // Write

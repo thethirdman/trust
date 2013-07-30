@@ -216,7 +216,7 @@ impl PTrie
     res
   }
 
-  fn do_serialize(&self, out: &mut ~[uint]) // FIXME: use ~[u8] ?
+  fn do_serialize(&self, out: &mut ~[uint])
   {
     // XXX This is NOT a breadth first search!
     out.push(self.succ.len());
@@ -233,23 +233,24 @@ impl PTrie
       }
     }
 
-    //let mut succ_id = out.len();
 
-    for self.succ.len().times
+    let mut succ_id = out.len();
+
+    let num_succ = self.succ.iter().filter(|i| i.is_some()).len_();
+    for num_succ.times
     { out.push(0) }
 
-    // FIXME
-    /*for self.succ.iter().advance |s|
+    for self.succ.iter().advance |s|
     {
-      out[succ_id] = out.len();
-      succ_id      = succ_id + 1;
-
-      match s
+      match *s
       {
-      None => { },
-      Some (ref succ) => succ.do_serialize(out)
+        None => { },
+        Some (ref succ) => {
+          out[succ_id] = out.len();
+          succ_id      = succ_id + 1;
+          succ.do_serialize(out)
+        }
       }
     }
-    */
   }
 }
