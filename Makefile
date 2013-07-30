@@ -16,4 +16,5 @@ dot:
 	dot -Tpdf ptrie.dot > ptrie.pdf
 	evince ptrie.pdf
 
-.PHONY: doc, test
+.PHONY: doc
+.PHONY: test
