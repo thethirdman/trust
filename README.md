@@ -58,7 +58,7 @@ cd trust
 make
 ```
 
-### Contributions
+## Contributions
 Keep in mind that this is a school assignment project. Thus, we do not plan to maintain this tool
 beyond the assignment deadline (July 31 2013). Anyway, do not hesitate to contribute. If you want
 do take-over the repository (and ensure a better future for this project) create an issue, or
