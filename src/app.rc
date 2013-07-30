@@ -7,8 +7,9 @@
 #[deny(non_uppercase_statics)];
 #[deny(unnecessary_qualification)];
 #[deny(missing_doc)];
-#[deny(warnings)];
 
 extern mod std;
 
 pub mod app;
+pub mod ptrie;
+pub mod compact_ptrie;

@@ -219,24 +219,18 @@ impl PTrie
   fn do_serialize(&self, out: &mut ~[uint])
   {
     // XXX This is NOT a breadth first search!
-    out.push(self.succ.len());
-    if self.key.len() == 0
-    {
-      out.push(0)
-    }
-    else
-    {
-      out.push(self.key.len());
-      for self.key.iter().advance |c|
-      {
-        out.push(c as uint);
-      }
-    }
+    let num_succ = self.succ.iter().filter(|i| i.is_some()).len_();
+    out.push(num_succ);
+    out.push(self.key.len());
+    out.push(self.freq);
 
+    for self.key.iter().advance |c|
+    {
+      out.push(c as uint);
+    }
 
     let mut succ_id = out.len();
 
-    let num_succ = self.succ.iter().filter(|i| i.is_some()).len_();
     for num_succ.times
     { out.push(0) }
 

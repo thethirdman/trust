@@ -49,7 +49,6 @@ fn main()
       for it.advance |(word, freq)|
       {
           trie.add_word(word, freq);
-          println(i.to_str());
           i = i + 1;
       }
 
@@ -59,10 +58,10 @@ fn main()
         let serialization = trie.serialize();
 
         for serialization.iter().advance |i|
-        { fwriter.write_uint(*i) }
+        { fwriter.write_le_u64((*i) as u64) }
       }
 
-      // println(trie.to_dot_str());
+      println(trie.to_dot_str());
     }
   // Serialize
   // Write
