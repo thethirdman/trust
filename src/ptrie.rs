@@ -1,4 +1,6 @@
 use std::util;
+use std::io;
+use std::sys;
 use my_list::{HasKey, MyList, Cons, Nil};
 
 /**
@@ -225,36 +227,36 @@ impl PTrie
    *    }
    * ```
    */
-  pub fn serialize(&self) -> ~[uint]
+  pub fn serialize(&self, out : @Writer)
   {
-    let mut res = ~[];
-
-    self.do_serialize(&mut res);
-
-    res
+    self.do_serialize(out);
   }
 
-  fn do_serialize(&self, out: &mut ~[uint])
+  fn do_serialize(&self, out: @Writer)
   {
     let num_succ = self.succ.len();
-    out.push(num_succ);
-    out.push(self.key.len());
-    out.push(self.freq);
+    out.write_le_u64(num_succ as u64);
+    out.write_le_u64(self.key.len() as u64);
+    out.write_le_u64(self.freq as u64);
 
     for self.key.iter().advance |c|
     {
-      out.push(c as uint);
+      out.write_le_u64(c as u64);
     }
 
-    let mut succ_id = out.len();
+    let mut succ_id = out.tell();
 
     for num_succ.times
-    { out.push(0) }
+    { out.write_le_u64(0) }
 
     do self.succ.iter |succ|
     {
-      out[succ_id] = out.len();
-      succ_id      = succ_id + 1;
+      let cur_pos = out.tell();
+      out.seek(succ_id as int, io::SeekSet);
+      out.write_le_u64(cur_pos / sys::size_of::<u64>() as u64);
+      out.seek(cur_pos as int, io::SeekSet);
+      //out[succ_id] = out.len();
+      succ_id      = succ_id + sys::size_of::<u64>();
       succ.do_serialize(out)
     }
   }

@@ -54,24 +54,14 @@ fn serialize_trie(args : &[~str], trie : ~PTrie)
 {
   let path          = PosixPath(args[2]);
   let fwriter       = io::buffered_file_writer(&path).unwrap();
-  let serialization = trie.serialize();
-
-  for serialization.iter().advance |i|
-  { fwriter.write_le_u64((*i) as u64) }
+  trie.serialize(fwriter);
+//  println(trie.to_dot_str());
 }
 
-// FIXME: exit comme un grand
 #[main]
 fn main()
 {
   let args : ~[~str] = os::args();
   serialize_trie(args, make_trie(args));
-    // println("Num nodes: " + trie.len().to_str());
-
-    {
-    }
-    //println(trie.to_dot_str());
-    // Serialize
-    // Write
 }
 
