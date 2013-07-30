@@ -55,7 +55,7 @@ impl PTrie
   /// Adds an element to the successors list
   pub fn push(&mut self, elt : ~PTrie)
   {
-    let mut newthing = ~Nil; // XXX Useless allocation
+    let mut newthing = ~Nil;
     util::swap(&mut self.succ, &mut newthing);
     self.succ = ~Cons(elt, newthing);
   }
@@ -86,14 +86,6 @@ impl PTrie
     }
     *id  = *id + 1;
 
-    /*for self.succ.iter().advance |s|
-    {
-      match *s
-      {
-        None        => { },
-        Some(ref t) => t.lbl_to_dot_str(id, out)
-      }
-    }*/
     self.succ.iter(|b| b.lbl_to_dot_str(id, out))
   }
 
@@ -101,18 +93,6 @@ impl PTrie
   {
     let me = *id;
 
-    /*for self.succ.iter().advance |s|
-    {
-      match *s
-      {
-        None        => { },
-        Some(ref t) => {
-          *id  = *id + 1;
-          *out = *out + me.to_str() + " -> " + id.to_str() + "\n";
-          t.edg_to_dot_str(id, out)
-        }
-      }
-    }*/
     do self.succ.iter |b|
     {
       *id  = *id + 1;
@@ -124,22 +104,26 @@ impl PTrie
 
   fn create_if(&mut self, word : ~str, succ_index: uint,  w_index : uint, freq : uint)
   {
-    //let succ_index =  word[succ_index] as uint;
-    if match self.succ.find_mut(|c| c == word[succ_index])
+    let child = match self.succ.find_mut(|c| c == word[succ_index])
        {
-         None               => true,
-         Some(ref mut trie) => {
-           trie.add_word_index(word.clone(), w_index, freq); // XXX: useless allocation
-           false
+         None               =>
+         {
+           let suffix = word.slice_from(w_index).to_str();
+           let mut child = ~PTrie::new(suffix);
+           assert!(child.freq == 0);
+           child.freq = freq;
+           Some(child)
+         },
+         Some(ref mut trie) =>
+         {
+           trie.add_word_index(word, w_index, freq);
+           None
          }
-       }
+       };
+    match child
     {
-      let suffix = word.slice_from(w_index).to_str();
-      let mut child = ~PTrie::new(suffix);
-      assert!(child.freq == 0);
-      child.freq = freq;
-      self.push(child)
-      //self.succ[succ_index] = Some(child);
+      None => { },
+      Some (child) => self.push(child)
     }
   }
 
@@ -154,6 +138,7 @@ impl PTrie
     {
       let mut k_index = 0;
       let mut w_index = w_index;
+
       // While the strings are the same
       while k_index < self.key.len() && w_index < word.len() && self.key[k_index] == word[w_index]
       {
@@ -188,8 +173,6 @@ impl PTrie
         self.freq    = freq;
 
         self.push(ptrie_k);
-        //let tmp        = ptrie_k.key[0] as uint;
-        //self.succ[tmp] = Some(ptrie_k);
       }
       // We have a common prefix: we split the key, create a new ptrie for
       // it, and create a new ptrie for the word
@@ -211,13 +194,7 @@ impl PTrie
         ptrie_w.freq = freq;
 
         self.push(ptrie_k);
-        //let tmp        = ptrie_k.key[0] as uint;
-        //self.succ[tmp] = Some(ptrie_k);
-
         self.push(ptrie_w);
-        //let tmp        = ptrie_w.key[0] as uint;
-        //self.succ[tmp] = Some(ptrie_w);
-
         self.freq = 0;
       }
     }
@@ -259,7 +236,6 @@ impl PTrie
 
   fn do_serialize(&self, out: &mut ~[uint])
   {
-    // XXX This is NOT a breadth first search!
     let num_succ = self.succ.len();
     out.push(num_succ);
     out.push(self.key.len());
@@ -275,18 +251,6 @@ impl PTrie
     for num_succ.times
     { out.push(0) }
 
-    /*for self.succ.iter().advance |s|
-    {
-      match *s
-      {
-        None => { },
-        Some (ref succ) => {
-          out[succ_id] = out.len();
-          succ_id      = succ_id + 1;
-          succ.do_serialize(out)
-        }
-      }
-    }*/
     do self.succ.iter |succ|
     {
       out[succ_id] = out.len();
