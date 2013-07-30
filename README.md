@@ -66,6 +66,7 @@ contact one of the two lead developers.
 
 ## Additional informations
 Here are some miscellaneous information about the **trust** project.
+
 ### How is designed trust?
 
 ### How did we test trust?
@@ -81,6 +82,7 @@ Two tools are built we tested them by:
 ### Why did we implement a Patricia Trie (Radix Trie)?
 A Patricia Trie is well known for its good performances and memory efficiency. Thus it was the most
 appealing data structure choice given the assignment constraints.
+
 ### If we need an accurate spell-checking, how could we automate the choice of the maximal distance between the requested word and the dictionary words?
 
 ### Further improvements?
@@ -92,4 +94,5 @@ appealing data structure choice given the assignment constraints.
     dictionary words in lexicographic order. Build, in parallel, patricia-tries for words begining
     with different letters. Then, attach thote tries to an universal ancestor (the empty root).
 Do not hesitate to contribute!
+
 ### Is trust a state-of-the-art spell checker? Why?
