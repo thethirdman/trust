@@ -280,3 +280,40 @@ fn do_find_candidates(start: *uint, curr: *uint, algo: &mut DLDist, out: &mut ~[
     }
   }
 }
+
+mod test
+{
+  #[test]
+  use compact_ptrie::DLDist;
+
+  #[test]
+  fn test_dist()
+  {
+    // hellow vs hlelow
+    let mut algo = DLDist::new(~"hellow", 2);
+
+    algo.take('h' as u8);
+
+    assert!(algo.dist() == 5);
+
+    algo.take('l' as u8);
+    algo.take('e' as u8);
+    algo.take('l' as u8);
+    algo.take('o' as u8);
+    algo.take('w' as u8);
+
+    assert!(algo.dist() == 1);
+
+    // hellow vs helpow
+    let mut algo = DLDist::new(~"hellow", 2);
+
+    algo.take('h' as u8);
+    algo.take('e' as u8);
+    algo.take('l' as u8);
+    algo.take('p' as u8);
+    algo.take('o' as u8);
+    algo.take('w' as u8);
+
+    assert!(algo.dist() == 1);
+  }
+}

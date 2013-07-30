@@ -2,6 +2,9 @@ all:
 	rust build --opt-level=3 src/compiler.rc -o TextMiningCompiler
 	rust build --opt-level=3 src/app.rc -o TextMiningApp
 
+test:
+	rust test src/app.rc
+
 doc:
 	mkdir -p doc/compiler
 	mkdir -p doc/app
@@ -13,4 +16,4 @@ dot:
 	dot -Tpdf ptrie.dot > ptrie.pdf
 	evince ptrie.pdf
 
-.PHONY: doc
+.PHONY: doc, test

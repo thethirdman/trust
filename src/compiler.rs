@@ -11,7 +11,7 @@ fn get_word(line : ~str) -> (~str, uint)
 
   match freq
   {
-    None => fail!("Error: could not convert `" + words[1] + "` to an int"),
+    None       => fail!("Error: could not convert `" + words[1] + "` to an int"),
     Some (ret) => (word.to_str(), ret)
   }
 }

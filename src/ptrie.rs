@@ -219,11 +219,11 @@ impl PTrie
    * ```
    *    struct PTrie
    *    {
-   *      nb_succ   : int,
-   *      key_len   : int,
-   *      freq      : int
-   *      key       : [char, ..key_len],
-   *      succ      : [int,  ..nb_succ]
+   *      nb_succ   : uint,
+   *      key_len   : uint,
+   *      freq      : uint
+   *      key       : [uint, ..key_len],
+   *      succ      : [uint, ..nb_succ]
    *    }
    * ```
    */
