@@ -6,7 +6,7 @@ bin=$3
 ref=$4
 refbin=$5
 
-shuf -n 300 $dico | sed "s/[ \t]*[0-9]\+$//" | sed "s/.*/approx 1 \0/" > test.txt
+shuf -n 30 $dico | sed "s/ *[0-9]\+$//" | sed "s/.*/approx 2 \0/" > test.txt
 
 echo "Test our version"
 cat test.txt | $app $bin > log

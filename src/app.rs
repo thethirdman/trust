@@ -26,6 +26,7 @@ fn main()
   while !stdin.eof()
   {
     let line            = stdin.read_line();
+    let line            = line.trim();
     let tokens: ~[&str] = line.split_iter(' ').collect();
 
     if tokens.len() == 3
