@@ -6,10 +6,10 @@ the words nearest to a user input. It it composed of two tools:
   * **TextMiningCompiler** (compiler.rc): builds the Patricia Trie in compact form from a
     dictionary.
   * **TextMiningApp** (app.rc): reads the trie output by the compiler, and reads its standard input
-    for requets with the form "approx 2 foo" (i.e. find in the dictionary all words which are at
+    for request with the form "approx 2 foo" (i.e. find in the dictionary all words which are at
       distance 2 from "foo".
 
-**trust** is open-source under the BSD-3 licence, and available on github:
+**trust** is open-source under the BSD-3 license, and available on github:
 https://github.com/thethirdman/trust
 
 Compilation
@@ -64,7 +64,7 @@ beyond the assignment deadline (July 31 2013). Anyway, do not hesitate to contri
 do take-over the repository (and ensure a better future for this project) create an issue, or
 contact one of the two lead developers.
 
-## Additional informations
+## Additional information
 Here are some miscellaneous information about the **trust** project.
 
 ### How is designed trust?
@@ -80,7 +80,7 @@ Two tools are built we tested them by:
 ### Is the Damerau-Levenshtein distance based spell-checker accurate ? When is it not?
 
 ### Why did we implement a Patricia Trie (Radix Trie)?
-A Patricia Trie is well known for its good performances and memory efficiency. Thus it was the most
+A Patricia Trie is well known for its good performance and memory efficiency. Thus it was the most
 appealing data structure choice given the assignment constraints.
 
 ### If we need an accurate spell-checking, how could we automate the choice of the maximal distance between the requested word and the dictionary words?
@@ -91,8 +91,8 @@ appealing data structure choice given the assignment constraints.
     batches of requests could easily be parallelized with one job per Patricia Trie traversal.
   * Parallelize the Patricia Trie construction. Depending on how fine grained we want the
     parallelism to be, this can be fairly easy. One interesting approach could be to sort all the
-    dictionary words in lexicographic order. Build, in parallel, patricia-tries for words begining
-    with different letters. Then, attach thote tries to an universal ancestor (the empty root).
+    dictionary words in lexicographic order. Build, in parallel, patricia-tries for words beginning
+    with different letters. Then, attach those tries to an universal ancestor (the empty root).
 Do not hesitate to contribute!
 
 ### Is trust a state-of-the-art spell checker? Why?
