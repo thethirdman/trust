@@ -43,8 +43,6 @@ fn main()
       }
     }
   }
-  // let trie = compact_ptrie::rebuild_ptrie(&dico);
-  // println(trie.to_dot_str())
 }
 
 fn map_file(path: Path) -> ~os::MemoryMap
@@ -53,7 +51,6 @@ fn map_file(path: Path) -> ~os::MemoryMap
              unsafe { open(path, O_RDONLY, S_IREAD) }
            };
 
-  // FIXME: no better way to get he file size?
   let file_size = unsafe { lseek(fd, 0, SEEK_END) } as uint;
   let min_sz = (file_size / os::page_size() + 1) * os::page_size();
 

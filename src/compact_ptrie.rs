@@ -106,16 +106,18 @@ fn do_rebuild_ptrie(start: *uint, curr: *uint) -> ~PTrie
   }
 }
 
-/// XXX: fix doc
+/// Structure to incrementally compute the Damerau-Levenshtein distance between a known reference
+/// word and a stream of characters.
 pub struct DLDist
 {
-  /// XXX: fix doc
+  /// The reference word.
   original: ~str,
-  /// XXX: fix doc
+  /// Current characters read from the stream.
   current:  ~[u8],
-  /// XXX: fix doc
+  /// Table used to compute the Damerau-Levenshtien distance using dynamic programming.
   table:    ~[uint],
-  /// XXX: fix doc
+  /// Max distance allowed between the reference word and the character stream. Once this distance
+  /// is reached the `take` method will return false.
   max_dist: uint
 }
 
@@ -134,7 +136,7 @@ impl ToStr for DLDist
       for uint::iterate(0u, self.original.len() + 1) |j|
       {
         let idx = i * (self.original.len() + 1) + j;
-        if  idx < self.table.len() // FIXME: this is verry dummy…
+        if  idx < self.table.len()
         { res = res + " " + self.table[idx].to_str() }
       }
 
@@ -149,7 +151,8 @@ impl ToStr for DLDist
 
 impl DLDist
 {
-  /// XXX: fix doc
+  /// Create a new structure to compute the Damerau-Levenshtein incrementally. It needs to be
+  /// initialized using the `reset` method.
   pub fn new()-> DLDist
   {
 
@@ -161,14 +164,18 @@ impl DLDist
     }
   }
 
-  /// XXX: fix doc
+  /// Returns on the past. All operations done after the `new_len` character are discarded.
   pub fn truncate(&mut self, new_len: uint)
   {
     self.current.truncate(new_len);
     self.table.truncate((new_len + 1) * (self.original.len() + 1));
   }
 
-  /// XXX: fix doc
+  /// Reinitializes the algorithm.
+  ///
+  /// # Arguments
+  ///   * word - the reference word.
+  ///   * max_dist - reachable distance before the algorithm gives up.
   pub fn reset(&mut self, word : ~str, max_dist : uint)
   {
     self.current.clear();
@@ -180,7 +187,8 @@ impl DLDist
     { self.table.push(i) }
   }
 
-  /// XXX: fix doc
+  /// Takes a character and computes the Damerau-Levenshtein distance between the newly formed word
+  /// and the reference word.
   pub fn take(&mut self, c: u8) -> (bool, bool)
   {
     let mut should_stop = true;
@@ -232,7 +240,13 @@ impl DLDist
   { *self.table.last() }
 }
 
-/// XXX Fix doc
+/// Finds every dictionary words at a certain distance from a reference word.
+///
+/// # Arguments:
+///   * `mem`      - the compiled patricia trie.
+///   * `word`     - the reference word to search.
+///   * `distance` - the maximum distance between the reference word and the dictionary words.
+///   * `algo`     - pre-allocated incremental Damerau-Levenshtein algorithm cache.
 pub fn find_candidates(mem: &os::MemoryMap, word: ~str, distance: uint, algo : &mut DLDist) -> ~[Word]
 {
   let mut res  = ~[];
@@ -260,7 +274,7 @@ fn do_find_candidates(start: *uint, curr: *uint, algo: &mut DLDist, out: &mut ~[
 
       let (should_stop, accept_this) = algo.take(*(kbegin + i) as u8);
 
-      accept = accept_this; // FIXME: uggly!
+      accept = accept_this;
 
       if should_stop
       { return }
