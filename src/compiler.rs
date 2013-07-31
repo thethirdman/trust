@@ -55,7 +55,7 @@ fn serialize_trie(args : &[~str], trie : ~PTrie)
   let path          = PosixPath(args[2]);
   let fwriter       = io::buffered_file_writer(&path).unwrap();
   trie.serialize(fwriter);
-//  println(trie.to_dot_str());
+  println(trie.to_dot_str());
 }
 
 #[main]

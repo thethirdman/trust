@@ -1,6 +1,7 @@
 use std::os;
 use std::libc::consts::os::posix88::{O_RDONLY, S_IREAD};
 use std::libc::funcs::posix88::fcntl::open;
+use extra::sort;
 use compact_ptrie;
 
 #[main]
@@ -17,9 +18,12 @@ fn main()
 
   let dico = map_file(path);
 
-  let trie = compact_ptrie::rebuild_ptrie(&dico);
+  let mut candidates = compact_ptrie::find_candidates(dico, ~"secin", 2);
 
-  println(trie.to_dot_str())
+  sort::quick_sort(candidates, |a, b| a < b);
+  print_array_without_spaces(candidates);
+  // let trie = compact_ptrie::rebuild_ptrie(&dico);
+  // println(trie.to_dot_str())
 }
 
 fn map_file(path: Path) -> ~os::MemoryMap
@@ -35,4 +39,23 @@ fn map_file(path: Path) -> ~os::MemoryMap
     Ok(mem)  => mem,
     Err(msg) => fail!(msg.to_str())
   }
+}
+
+fn print_array_without_spaces<T: ToStr>(arr: &[T])
+{
+  print("[");
+
+  if arr.len() != 0
+  {
+    let mut it = arr.iter();
+    print(it.next().unwrap().to_str());
+
+    for it.advance |e|
+    {
+      print(",");
+      print(e.to_str());
+    }
+  }
+
+  println("]")
 }
