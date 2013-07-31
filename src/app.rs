@@ -3,6 +3,7 @@ use std::libc::consts::os::c95::SEEK_END;
 use std::libc::consts::os::posix88::{O_RDONLY, S_IREAD};
 use std::libc::funcs::posix88::fcntl::open;
 use std::libc::funcs::posix88::unistd::lseek;
+use std::io;
 use extra::sort;
 use compact_ptrie;
 
@@ -20,10 +21,27 @@ fn main()
 
   let dico = map_file(path);
 
-  let mut candidates = compact_ptrie::find_candidates(dico, ~"secin", 2);
+  let stdin = io::stdin();
 
-  sort::quick_sort(candidates, |a, b| a < b);
-  print_array_without_spaces(candidates);
+  while !stdin.eof()
+  {
+    let line            = stdin.read_line();
+    let tokens: ~[&str] = line.split_iter(' ').collect();
+
+    if tokens.len() == 3
+    {
+      match (FromStr::from_str::<uint>(tokens[1]))
+      {
+        None       => { },
+        Some(dist) => {
+          let mut candidates = compact_ptrie::find_candidates(dico, tokens[2].to_owned(), dist);
+
+          sort::quick_sort(candidates, |a, b| a < b);
+          print_array_without_spaces(candidates);
+        }
+      }
+    }
+  }
   // let trie = compact_ptrie::rebuild_ptrie(&dico);
   // println(trie.to_dot_str())
 }
