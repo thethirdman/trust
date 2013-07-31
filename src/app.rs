@@ -23,19 +23,19 @@ fn main()
 
   let stdin = io::stdin();
 
+  let mut algo = compact_ptrie::DLDist::new();
   while !stdin.eof()
   {
     let line            = stdin.read_line();
     let line            = line.trim();
     let tokens: ~[&str] = line.split_iter(' ').collect();
-
     if tokens.len() == 3
     {
       match (FromStr::from_str::<uint>(tokens[1]))
       {
         None       => { },
         Some(dist) => {
-          let mut candidates = compact_ptrie::find_candidates(dico, tokens[2].to_owned(), dist);
+          let mut candidates = compact_ptrie::find_candidates(dico, tokens[2].to_owned(), dist, &mut algo);
 
           sort::quick_sort(candidates, |a, b| a < b);
           print_array_without_spaces(candidates);

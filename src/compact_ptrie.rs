@@ -1,6 +1,5 @@
 use std::uint;
 use std::os;
-use std::vec;
 use std::str;
 use ptrie::PTrie;
 
@@ -151,19 +150,14 @@ impl ToStr for DLDist
 impl DLDist
 {
   /// XXX: fix doc
-  pub fn new(original: ~str, distance: uint) -> DLDist
+  pub fn new()-> DLDist
   {
-    let olen      = original.len() + 1;
-    let mut table = vec::with_capacity(olen * olen);
-
-    for uint::iterate(0u, olen) |i|
-    { table.push(i) }
 
     DLDist {
       current:  ~[],
-      table:    table,
-      original: original,
-      max_dist: distance
+      table:    ~[],
+      original: ~"",
+      max_dist:  0
     }
   }
 
@@ -172,6 +166,18 @@ impl DLDist
   {
     self.current.truncate(new_len);
     self.table.truncate((new_len + 1) * (self.original.len() + 1));
+  }
+
+  /// XXX: fix doc
+  pub fn reset(&mut self, word : ~str, max_dist : uint)
+  {
+    self.current.clear();
+    self.table.clear();
+    self.original = word;
+    self.max_dist = max_dist;
+
+    for uint::iterate(0u, self.original.len() + 1) |i|
+    { self.table.push(i) }
   }
 
   /// XXX: fix doc
@@ -227,13 +233,13 @@ impl DLDist
 }
 
 /// XXX Fix doc
-pub fn find_candidates(mem: &os::MemoryMap, word: ~str, distance: uint) -> ~[Word]
+pub fn find_candidates(mem: &os::MemoryMap, word: ~str, distance: uint, algo : &mut DLDist) -> ~[Word]
 {
   let mut res  = ~[];
-  let mut algo = DLDist::new(word, distance);
+  //let mut algo = DLDist::new(word, distance);
 
-  do_find_candidates(mem.data as *uint, mem.data as *uint, &mut algo, &mut res);
-
+  algo.reset(word, distance);
+  do_find_candidates(mem.data as *uint, mem.data as *uint, algo, &mut res);
   res
 }
 
