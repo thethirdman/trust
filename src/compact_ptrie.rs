@@ -107,11 +107,16 @@ fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
   }
 }
 
-struct DLDist
+/// XXX: fix doc
+pub struct DLDist
 {
+  /// XXX: fix doc
   original: ~str,
+  /// XXX: fix doc
   current:  ~[u8],
+  /// XXX: fix doc
   table:    ~[uint],
+  /// XXX: fix doc
   max_dist: uint
 }
 
@@ -192,12 +197,12 @@ impl DLDist
 
       let distance = (l + 1).min(&(u + 1)).min(&(ul + sub_weight));
 
-      if self.current.len() > 1 && j > 1
+      if i > 1 && j > 0
       {
         let uull = self.table[self.table.len() - 2 * (self.original.len() + 1) - 2];
 
         let trans_weight = if self.current[i - 1] == self.original[j - 1] &&
-                              self.current[i - 2] == self.original[j - 2]
+                              self.current[i - 2] == self.original[j]
         { 1 }
         else
         { Bounded::max_value::<uint>() - uull };
