@@ -71,6 +71,7 @@ fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
 {
   unsafe {
     let header = curr as *PTrieHeader;
+
     let kbegin    = curr + 3;
     let succbegin = curr + 3 + (*header).key_len;
 

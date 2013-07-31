@@ -1,6 +1,8 @@
 use std::os;
+use std::libc::consts::os::c95::SEEK_END;
 use std::libc::consts::os::posix88::{O_RDONLY, S_IREAD};
 use std::libc::funcs::posix88::fcntl::open;
+use std::libc::funcs::posix88::unistd::lseek;
 use extra::sort;
 use compact_ptrie;
 
@@ -32,7 +34,9 @@ fn map_file(path: Path) -> ~os::MemoryMap
              unsafe { open(path, O_RDONLY, S_IREAD) }
            };
 
-  let min_sz = os::page_size() * 2;
+  // FIXME: no better way to get he file size?
+  let file_size = unsafe { lseek(fd, 0, SEEK_END) } as uint;
+  let min_sz = (file_size / os::page_size() + 1) * os::page_size();
 
   match os::MemoryMap::new(min_sz, ~[os::MapReadable, os::MapFd(fd), os::MapOffset(0)])
   {
