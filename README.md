@@ -69,6 +69,18 @@ Here are some miscellaneous information about the **trust** project.
 
 ### How is designed trust?
 
+  * The compiler, reads the input file and builds a  naive  version of the
+    ptrie. This version is then serialized into a compressed one. The main
+    objective of the compiler was to have a reduced memory usage. This led us
+    to use a minimal data-structure, and an improved serialization algorithm in
+    order to stay below the 512MB barrier.
+  * A node of the compressed ptrie is a  struct containing the number of
+    successors, the size of the key stored in this node, and array containing the key,
+    and an array containing references to the successors.
+  * The application reads this compressed ptrie, and does a dynamic
+    Damereau-Levenshtein distance in order to know the valid candidates to
+    return. They are then sorted are printed.
+
 ### How did we test trust?
 Two tools are built we tested them by:
   * manually checking that the Patricia Trie is correct (using a text representation of the
@@ -78,12 +90,19 @@ Two tools are built we tested them by:
   * unit-testing the incremental Damerau-Levenshtein distance algorithm.
 
 ### Is the Damerau-Levenshtein distance based spell-checker accurate ? When is it not?
+This is an interesting approach, but it does not take into account the keyboard layout.
+For instance, "wirkd" could be considered close the "world" since the mistake is a shift of the right-hand on the keyboard.
 
 ### Why did we implement a Patricia Trie (Radix Trie)?
 A Patricia Trie is well known for its good performance and memory efficiency. Thus it was the most
 appealing data structure choice given the assignment constraints.
 
 ### If we need an accurate spell-checking, how could we automate the choice of the maximal distance between the requested word and the dictionary words?
+  * The distance can depend on the length of the word to check. This way, the
+    number of allowed errors is proportional to the word length
+  * Another approach could be to associate with each word of the dictionnary a
+    mean error distance. Then we use this mean error as a maximum distance
+    between the requested word and the dictionary words.
 
 ### Further improvements?
 **trust** can be improved in several ways:
@@ -96,3 +115,7 @@ appealing data structure choice given the assignment constraints.
 Do not hesitate to contribute!
 
 ### Is trust a state-of-the-art spell checker? Why?
+No, we need to improve the performance and improve the efficiency of our
+distance. There are data-structures that could be interesting to test in our
+project, as they may improve performance.
+
