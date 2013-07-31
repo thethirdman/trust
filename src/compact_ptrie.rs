@@ -58,16 +58,16 @@ impl ToStr for Word
 #[deriving(ToStr)]
 struct PTrieHeader
 {
-  nb_succ: u64,
-  key_len: u64,
-  freq:    u64 
+  nb_succ: uint,
+  key_len: uint,
+  freq:    uint 
 }
 
 /// Rebuilds the patricia trie from its compact version
 pub fn rebuild_ptrie(mem: &~os::MemoryMap) -> ~PTrie
-{ do_rebuild_ptrie(mem.data as *u64, mem.data as *u64) }
+{ do_rebuild_ptrie(mem.data as *uint, mem.data as *uint) }
 
-fn do_rebuild_ptrie(start: *u64, curr: *u64) -> ~PTrie
+fn do_rebuild_ptrie(start: *uint, curr: *uint) -> ~PTrie
 {
   unsafe {
     let header = curr as *PTrieHeader;
@@ -232,12 +232,12 @@ pub fn find_candidates(mem: &os::MemoryMap, word: ~str, distance: uint) -> ~[Wor
   let mut res  = ~[];
   let mut algo = DLDist::new(word, distance);
 
-  do_find_candidates(mem.data as *u64, mem.data as *u64, &mut algo, &mut res);
+  do_find_candidates(mem.data as *uint, mem.data as *uint, &mut algo, &mut res);
 
   res
 }
 
-fn do_find_candidates(start: *u64, curr: *u64, algo: &mut DLDist, out: &mut ~[Word])
+fn do_find_candidates(start: *uint, curr: *uint, algo: &mut DLDist, out: &mut ~[Word])
 {
   unsafe {
     let header    = curr as *PTrieHeader;

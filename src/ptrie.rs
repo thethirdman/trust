@@ -235,28 +235,28 @@ impl PTrie
   fn do_serialize(&self, out: @Writer)
   {
     let num_succ = self.succ.len();
-    out.write_le_u64(num_succ as u64);
-    out.write_le_u64(self.key.len() as u64);
-    out.write_le_u64(self.freq as u64);
+    out.write_le_uint(num_succ);
+    out.write_le_uint(self.key.len());
+    out.write_le_uint(self.freq);
 
     for self.key.iter().advance |c|
     {
-      out.write_le_u64(c as u64);
+      out.write_le_uint(c as uint);
     }
 
     let mut succ_id = out.tell();
 
     for num_succ.times
-    { out.write_le_u64(0) }
+    { out.write_le_uint(0) }
 
     do self.succ.iter |succ|
     {
       let cur_pos = out.tell();
       out.seek(succ_id as int, io::SeekSet);
-      out.write_le_u64(cur_pos / sys::size_of::<u64>() as u64);
+      out.write_le_uint(cur_pos / sys::size_of::<uint>());
       out.seek(cur_pos as int, io::SeekSet);
       //out[succ_id] = out.len();
-      succ_id      = succ_id + sys::size_of::<u64>();
+      succ_id      = succ_id + sys::size_of::<uint>();
       succ.do_serialize(out)
     }
   }
