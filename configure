@@ -4,7 +4,7 @@ git clone git://github.com/mozilla/rust.git rust_compiler
 cd rust_compiler
 git checkout 6296dc0d73527301f18ef55b5f2d07c3241b8a00
 ./configure
-make
+make -j5
 sudo make install 
 cd ..
 rm -rf rust_compiler
